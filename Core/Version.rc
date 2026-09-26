@@ -1,0 +1,27 @@
+#include "Version.h"
+
+#define TB_RC_STR_DETAIL(x) #x
+#define TB_RC_STR(x) TB_RC_STR_DETAIL(x)
+#define TB_LOADER_VERSION_STRING \
+    TB_RC_STR(TB_LOADER_MAJOR) "." TB_RC_STR(TB_LOADER_MINOR) "." TB_RC_STR(TB_LOADER_PATCH)
+
+1 VERSIONINFO
+FILEVERSION TB_LOADER_MAJOR, TB_LOADER_MINOR, TB_LOADER_PATCH, 0
+PRODUCTVERSION TB_LOADER_MAJOR, TB_LOADER_MINOR, TB_LOADER_PATCH, 0
+FILEOS 0x40004L
+FILETYPE 0x1L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "ProductName", "ThrowbackLoader"
+            VALUE "FileVersion", TB_LOADER_VERSION_STRING
+            VALUE "ProductVersion", TB_LOADER_VERSION_STRING
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

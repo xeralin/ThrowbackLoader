@@ -1,0 +1,7 @@
+[Config]
+username = 'ThrowbackUser' # Max 16 characters
+user_id = ''
+
+[Launch]
+args = '/belaunch /nologo'
+autorun = []

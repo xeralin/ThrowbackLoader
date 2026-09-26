@@ -1,0 +1,26 @@
+name: Release zip
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install build deps
+        run: sudo apt-get update && sudo apt-get install -y g++-mingw-w64-x86-64 ninja-build zip
+      - uses: actions/checkout@v7
+      - name: Build release zip
+        run: bash build.sh
+      - name: Create draft release with zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || \
+            gh release create "$GITHUB_REF_NAME" --draft --title "$GITHUB_REF_NAME" --notes ""
+          gh release upload "$GITHUB_REF_NAME" "ThrowbackLoader-${GITHUB_REF_NAME#v}.zip" --clobber
