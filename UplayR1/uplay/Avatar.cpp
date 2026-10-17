@@ -3,7 +3,7 @@
 DLLEXPORT int UPLAY_AVATAR_Get()
 {
     LOGGER_INFO(__FUNCTION__);
-    return 1;
+    return 0;
 }
 
 DLLEXPORT int UPLAY_AVATAR_GetAvatarIdForCurrentUser()
