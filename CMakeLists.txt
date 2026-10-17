@@ -34,6 +34,7 @@ if(NOT EXISTS "${TBL_TOML_HPP}")
 endif()
 
 add_library(tbl_core STATIC
+    Core/Bridge.cpp
     Core/CloseGuard.cpp
     Core/Config.cpp
     Core/Core.cpp

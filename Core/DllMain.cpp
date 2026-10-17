@@ -13,6 +13,7 @@ BOOL APIENTRY DllMain(HMODULE, DWORD call_reason, LPVOID)
         reset_streaminginstall();
         remove_sen_client();
         start_close_guard();
+        start_bridge();
     }
     return TRUE;
 }

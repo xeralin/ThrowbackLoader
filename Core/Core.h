@@ -5,6 +5,7 @@
 #define NOMINMAX
 #include <windows.h>
 
+#include "Bridge.h"
 #include "CloseGuard.h"
 #include "Config.h"
 #include "Consts.h"
