@@ -9,19 +9,16 @@ struct ChunkList
 
 DLLEXPORT int UPC_InstallChunkListFree(ContextData* context, ChunkList* chunk_list)
 {
-    LOGGER_INFO(__FUNCTION__);
     if (!context || !chunk_list)
     {
         return -2;
     }
-    delete[] chunk_list->chunk_list;
     delete chunk_list;
     return 0;
 }
 
 DLLEXPORT int UPC_InstallChunkListGet(ContextData* context, ChunkList** out_chunk_list)
 {
-    LOGGER_INFO(__FUNCTION__);
     if (!context || !out_chunk_list)
     {
         return -2;
@@ -32,18 +29,15 @@ DLLEXPORT int UPC_InstallChunkListGet(ContextData* context, ChunkList** out_chun
 
 DLLEXPORT int UPC_InstallChunksOrderUpdate()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
 
 DLLEXPORT int UPC_InstallChunksOrderUpdate_Extended()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
 
 DLLEXPORT int UPC_InstallChunksPresenceCheck()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
