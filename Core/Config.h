@@ -9,7 +9,7 @@
 class UplayConfig
 {
     std::string m_Username = CONSTS::DEFAULT_USERNAME;
-    std::string m_UserId = CONSTS::DEFAULT_USER_ID;
+    std::string m_UserId = "Throwback_Unknown";
     uint32_t m_AppId = 0;
 
   public:
