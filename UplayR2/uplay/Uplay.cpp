@@ -2,8 +2,6 @@
 
 DLLEXPORT const char* UPC_ErrorToString(int error)
 {
-    LOGGER_INFO(__FUNCTION__);
-
     switch (error)
     {
     case -1:
@@ -20,6 +18,8 @@ DLLEXPORT const char* UPC_ErrorToString(int error)
         return "Not found";
     case -7:
         return "End of file";
+    case -8:
+        return "Limit reached";
     case -9:
         return "Unauthorized action";
     case -10:
@@ -37,8 +37,6 @@ DLLEXPORT const char* UPC_ErrorToString(int error)
 
 DLLEXPORT int UPC_ApplicationIdGet(ContextData* context, const char** out_app_id)
 {
-    LOGGER_INFO(__FUNCTION__);
-
     if (!context || !out_app_id)
     {
         return -2;
@@ -50,49 +48,40 @@ DLLEXPORT int UPC_ApplicationIdGet(ContextData* context, const char** out_app_id
 
 DLLEXPORT int UPC_AvatarFree()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
 
 DLLEXPORT int UPC_AvatarGet()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
 
 DLLEXPORT int UPC_BlacklistAdd()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
 
 DLLEXPORT int UPC_BlacklistHas()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
 
 DLLEXPORT int UPC_BlacklistHas_Extended()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
 
 DLLEXPORT void UPC_Cancel()
 {
-    LOGGER_INFO(__FUNCTION__);
 }
 
 DLLEXPORT ContextData* UPC_ContextCreate()
 {
-    LOGGER_INFO(__FUNCTION__);
     return new ContextData();
 }
 
 DLLEXPORT int UPC_ContextFree(ContextData* context)
 {
-    LOGGER_INFO(__FUNCTION__);
-
     if (!context)
     {
         return -2;
@@ -104,8 +93,6 @@ DLLEXPORT int UPC_ContextFree(ContextData* context)
 
 DLLEXPORT int UPC_CPUScoreGet(ContextData* context, unsigned int* out_score)
 {
-    LOGGER_INFO(__FUNCTION__);
-
     if (!context || !out_score)
     {
         return -2;
@@ -117,14 +104,11 @@ DLLEXPORT int UPC_CPUScoreGet(ContextData* context, unsigned int* out_score)
 
 DLLEXPORT const char* UPC_EmailGet()
 {
-    LOGGER_INFO(__FUNCTION__);
     return CONSTS::UPLAY::DEFAULT_EMAIL;
 }
 
 DLLEXPORT int UPC_EmailGet_Extended(ContextData* context, const char** out_email)
 {
-    LOGGER_INFO(__FUNCTION__);
-
     if (!context || !out_email)
     {
         return -2;
@@ -136,7 +120,6 @@ DLLEXPORT int UPC_EmailGet_Extended(ContextData* context, const char** out_email
 
 DLLEXPORT int UPC_EventNextPeek()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
 
@@ -147,20 +130,16 @@ DLLEXPORT int UPC_EventNextPoll()
 
 DLLEXPORT int UPC_EventRegisterHandler()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
 
 DLLEXPORT int UPC_EventUnregisterHandler()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
 
 DLLEXPORT int UPC_GPUScoreGet(ContextData* context, unsigned* out_score, float* out_confidence_level)
 {
-    LOGGER_INFO(__FUNCTION__);
-
     if (!context || !out_score || !out_confidence_level)
     {
         return -2;
@@ -171,17 +150,13 @@ DLLEXPORT int UPC_GPUScoreGet(ContextData* context, unsigned* out_score, float* 
     return 0;
 }
 
-DLLEXPORT const char* UPC_IdGet(ContextData* context)
+DLLEXPORT const char* UPC_IdGet()
 {
-    LOGGER_INFO(__FUNCTION__);
-
     return g_uplay_config.GetUserId().c_str();
 }
 
 DLLEXPORT int UPC_IdGet_Extended(ContextData* context, const char** out_id)
 {
-    LOGGER_INFO(__FUNCTION__);
-
     if (!context || !out_id)
     {
         return -2;
@@ -193,7 +168,6 @@ DLLEXPORT int UPC_IdGet_Extended(ContextData* context, const char** out_id)
 
 DLLEXPORT int UPC_Init(unsigned in_version, int appid)
 {
-    LOGGER_INFO(__FUNCTION__);
     g_uplay_config.Initialize();
     g_uplay_config.SetAppId(appid);
     return 0;
@@ -201,14 +175,11 @@ DLLEXPORT int UPC_Init(unsigned in_version, int appid)
 
 DLLEXPORT const char* UPC_InstallLanguageGet()
 {
-    LOGGER_INFO(__FUNCTION__);
     return CONSTS::UPLAY::DEFAULT_GAME_LANGUAGE;
 }
 
 DLLEXPORT int UPC_InstallLanguageGet_Extended(ContextData* context, const char** out_install_language)
 {
-    LOGGER_INFO(__FUNCTION__);
-
     if (!context || !out_install_language)
     {
         return -2;
@@ -220,21 +191,16 @@ DLLEXPORT int UPC_InstallLanguageGet_Extended(ContextData* context, const char**
 
 DLLEXPORT int UPC_LaunchApp()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
 
-DLLEXPORT const char* UPC_NameGet(ContextData* context)
+DLLEXPORT const char* UPC_NameGet()
 {
-    LOGGER_INFO(__FUNCTION__);
-
     return g_uplay_config.GetUsername().c_str();
 }
 
 DLLEXPORT int UPC_NameGet_Extended(ContextData* context, const char** out_name)
 {
-    LOGGER_INFO(__FUNCTION__);
-
     if (!context || !out_name)
     {
         return -2;
@@ -246,32 +212,26 @@ DLLEXPORT int UPC_NameGet_Extended(ContextData* context, const char** out_name)
 
 DLLEXPORT int UPC_RichPresenceSet()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
 
 DLLEXPORT int UPC_RichPresenceSet_Extended()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
 
 DLLEXPORT int UPC_ShowBrowserUrl()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
 
 DLLEXPORT const char* UPC_TicketGet()
 {
-    LOGGER_INFO(__FUNCTION__);
     return CONSTS::UPLAY::DEFAULT_TICKETID;
 }
 
 DLLEXPORT int UPC_TicketGet_Extended(ContextData* context, const char** out_ticket)
 {
-    LOGGER_INFO(__FUNCTION__);
-
     if (!context || !out_ticket)
     {
         return -2;
@@ -283,7 +243,6 @@ DLLEXPORT int UPC_TicketGet_Extended(ContextData* context, const char** out_tick
 
 DLLEXPORT void UPC_Uninit()
 {
-    LOGGER_INFO(__FUNCTION__);
     arm_quit_guard();
 }
 
@@ -306,7 +265,7 @@ DLLEXPORT int UPC_Update(ContextData* context)
             cb = context->callbacks.front();
             context->callbacks.pop();
         }
-        cb.callback(cb.arg1, cb.context_data);
+        cb.callback(cb.result, cb.context_data);
     }
 
     return 0;
@@ -314,30 +273,25 @@ DLLEXPORT int UPC_Update(ContextData* context)
 
 DLLEXPORT int UPC_UserAccountCountryGet()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
 
 DLLEXPORT int UPC_UserFree()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
 
 DLLEXPORT int UPC_UserGet()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
 
 DLLEXPORT int UPC_UserPlayedWithAdd()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
 
 DLLEXPORT int UPC_UserPlayedWithAdd_Extended()
 {
-    LOGGER_INFO(__FUNCTION__);
     return 0;
 }
