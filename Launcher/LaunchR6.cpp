@@ -1,5 +1,4 @@
 #define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
 #include <windows.h>
 #include <shellapi.h>
 #include <tlhelp32.h>
@@ -137,6 +136,61 @@ bool is_game_process(const wchar_t* executable)
     return false;
 }
 
+std::wstring image_directory(HANDLE process)
+{
+    wchar_t path[MAX_PATH];
+    DWORD length = MAX_PATH;
+    if (QueryFullProcessImageNameW(process, 0, path, &length) == FALSE)
+    {
+        return {};
+    }
+    const auto separator = std::wstring_view(path, length).find_last_of(L"\\/");
+    return separator == std::wstring_view::npos ? std::wstring{} : std::wstring(path, separator);
+}
+
+bool runs_from(DWORD pid, const std::wstring& directory)
+{
+    const HANDLE process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
+    if (process == nullptr)
+    {
+        return false;
+    }
+    const std::wstring process_directory = image_directory(process);
+    CloseHandle(process);
+    return CompareStringOrdinal(process_directory.c_str(), static_cast<int>(process_directory.size()),
+                                directory.c_str(), static_cast<int>(directory.size()), TRUE) == CSTR_EQUAL;
+}
+
+std::vector<DWORD> find_game_processes()
+{
+    std::vector<DWORD> pids;
+    const std::wstring directory = image_directory(GetCurrentProcess());
+    if (directory.empty())
+    {
+        return pids;
+    }
+
+    const HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (snapshot == INVALID_HANDLE_VALUE)
+    {
+        return pids;
+    }
+    PROCESSENTRY32W entry{};
+    entry.dwSize = sizeof(entry);
+    if (Process32FirstW(snapshot, &entry))
+    {
+        do
+        {
+            if (is_game_process(entry.szExeFile) && runs_from(entry.th32ProcessID, directory))
+            {
+                pids.push_back(entry.th32ProcessID);
+            }
+        } while (Process32NextW(snapshot, &entry));
+    }
+    CloseHandle(snapshot);
+    return pids;
+}
+
 struct WindowQuery
 {
     const std::vector<DWORD>* pids;
@@ -165,26 +219,7 @@ BOOL CALLBACK on_window(HWND window, LPARAM parameter)
 
 bool game_window_present()
 {
-    std::vector<DWORD> pids;
-    const HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-    if (snapshot == INVALID_HANDLE_VALUE)
-    {
-        return false;
-    }
-    PROCESSENTRY32W entry{};
-    entry.dwSize = sizeof(entry);
-    if (Process32FirstW(snapshot, &entry))
-    {
-        do
-        {
-            if (is_game_process(entry.szExeFile))
-            {
-                pids.push_back(entry.th32ProcessID);
-            }
-        } while (Process32NextW(snapshot, &entry));
-    }
-    CloseHandle(snapshot);
-
+    const std::vector<DWORD> pids = find_game_processes();
     if (pids.empty())
     {
         return false;
@@ -197,29 +232,15 @@ bool game_window_present()
 
 void terminate_game_processes()
 {
-    const HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-    if (snapshot == INVALID_HANDLE_VALUE)
+    for (const DWORD pid : find_game_processes())
     {
-        return;
-    }
-    PROCESSENTRY32W entry{};
-    entry.dwSize = sizeof(entry);
-    if (Process32FirstW(snapshot, &entry))
-    {
-        do
+        const HANDLE process = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
+        if (process != nullptr)
         {
-            if (is_game_process(entry.szExeFile))
-            {
-                const HANDLE process = OpenProcess(PROCESS_TERMINATE, FALSE, entry.th32ProcessID);
-                if (process != nullptr)
-                {
-                    TerminateProcess(process, 0);
-                    CloseHandle(process);
-                }
-            }
-        } while (Process32NextW(snapshot, &entry));
+            TerminateProcess(process, 0);
+            CloseHandle(process);
+        }
     }
-    CloseHandle(snapshot);
 }
 
 const wchar_t* find_installed_executable()
