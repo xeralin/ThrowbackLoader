@@ -1,5 +1,4 @@
 #define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
 #include <windows.h>
 
 #include "CloseGuard.h"
@@ -23,32 +22,15 @@ BYTE g_nt_terminate_byte = 0;
 int g_unneuter_state = 0;
 int g_unneuter_countdown = 0;
 
-void capture_terminate_prologue()
+void capture_prologue(const wchar_t* module, const char* name, BYTE fallback, void*& proc, BYTE& original)
 {
-    const HMODULE kernel = GetModuleHandleW(L"kernel32.dll");
-    if (kernel != nullptr)
+    proc = reinterpret_cast<void*>(GetProcAddress(GetModuleHandleW(module), name));
+    if (proc != nullptr)
     {
-        g_terminate_proc = reinterpret_cast<void*>(GetProcAddress(kernel, "TerminateProcess"));
-        if (g_terminate_proc != nullptr)
+        original = *static_cast<BYTE*>(proc);
+        if (original == 0xC3)
         {
-            g_terminate_byte = *static_cast<BYTE*>(g_terminate_proc);
-            if (g_terminate_byte == 0xC3)
-            {
-                g_terminate_byte = 0x48;
-            }
-        }
-    }
-    const HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
-    if (ntdll != nullptr)
-    {
-        g_nt_terminate_proc = reinterpret_cast<void*>(GetProcAddress(ntdll, "NtTerminateProcess"));
-        if (g_nt_terminate_proc != nullptr)
-        {
-            g_nt_terminate_byte = *static_cast<BYTE*>(g_nt_terminate_proc);
-            if (g_nt_terminate_byte == 0xC3)
-            {
-                g_nt_terminate_byte = 0x4c;
-            }
+            original = fallback;
         }
     }
 }
@@ -82,7 +64,7 @@ void maybe_unneuter()
     }
     if (g_unneuter_state == 0)
     {
-        if (*static_cast<unsigned char*>(g_nt_terminate_proc) == 0xC3)
+        if (*static_cast<BYTE*>(g_nt_terminate_proc) == 0xC3)
         {
             g_unneuter_state = 1;
             g_unneuter_countdown = UNNEUTER_DELAY_TICKS;
@@ -239,7 +221,8 @@ DWORD WINAPI guard_thread(LPVOID)
 
 void start_close_guard()
 {
-    capture_terminate_prologue();
+    capture_prologue(L"kernel32.dll", "TerminateProcess", 0x48, g_terminate_proc, g_terminate_byte);
+    capture_prologue(L"ntdll.dll", "NtTerminateProcess", 0x4C, g_nt_terminate_proc, g_nt_terminate_byte);
     g_close_event = CreateEventW(nullptr, TRUE, FALSE, nullptr);
     if (g_close_event == nullptr)
     {
