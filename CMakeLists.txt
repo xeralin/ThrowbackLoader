@@ -16,39 +16,39 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
 
-add_link_options(-static -static-libgcc -static-libstdc++)
+add_link_options(-static)
 add_link_options($<$<NOT:$<CONFIG:Debug>>:-s>)
 add_link_options(-Wl,--no-insert-timestamp)
 
 set(TBL_DEPS_INC "${CMAKE_BINARY_DIR}/third_party")
 set(TBL_TOML_URL "https://raw.githubusercontent.com/marzer/tomlplusplus/v3.4.0/toml.hpp")
+set(TBL_TOML_SHA256 "6b5172ad4dd6519aec67b919181fa7a38a2234131e5b2afa232dfe444819783e")
 set(TBL_TOML_HPP "${TBL_DEPS_INC}/toml++/toml.hpp")
 if(NOT EXISTS "${TBL_TOML_HPP}")
-    file(DOWNLOAD "${TBL_TOML_URL}" "${TBL_TOML_HPP}" TLS_VERIFY ON STATUS _st)
+    file(DOWNLOAD "${TBL_TOML_URL}" "${TBL_TOML_HPP}.download" TLS_VERIFY ON EXPECTED_HASH SHA256=${TBL_TOML_SHA256}
+         STATUS _st)
     list(GET _st 0 _code)
     if(NOT _code EQUAL 0)
         list(GET _st 1 _msg)
-        file(REMOVE "${TBL_TOML_HPP}")
+        file(REMOVE "${TBL_TOML_HPP}.download")
         message(FATAL_ERROR "Download failed (${TBL_TOML_URL}): ${_msg}")
     endif()
+    file(RENAME "${TBL_TOML_HPP}.download" "${TBL_TOML_HPP}")
 endif()
 
 add_library(tbl_core STATIC
     Core/Bridge.cpp
     Core/CloseGuard.cpp
     Core/Config.cpp
-    Core/Core.cpp
-    Core/Logger.cpp
     Core/Utils.cpp)
-target_include_directories(tbl_core PUBLIC Core "${TBL_DEPS_INC}")
+target_include_directories(tbl_core PUBLIC Core PRIVATE "${TBL_DEPS_INC}")
 
 function(tbl_add_dll target out_name)
     add_library(${target} SHARED ${ARGN})
     target_link_libraries(${target} PRIVATE tbl_core)
     set_target_properties(${target} PROPERTIES
         PREFIX ""
-        OUTPUT_NAME "${out_name}"
-        SUFFIX ".dll")
+        OUTPUT_NAME "${out_name}")
 endfunction()
 
 tbl_add_dll(uplay_r1 uplay_r1_loader64
@@ -89,12 +89,10 @@ add_custom_command(TARGET uplay_r2 POST_BUILD
         "$<TARGET_FILE:uplay_r2>"
         "$<TARGET_FILE_DIR:uplay_r2>/uplay_r2_loader64.dll")
 
-tbl_add_dll(defaultargs defaultargs
-    DefaultArgs/DllMain.cpp
-    DefaultArgs/exports.def)
+add_library(defaultargs SHARED DefaultArgs/DefaultArgs.cpp DefaultArgs/exports.def)
+set_target_properties(defaultargs PROPERTIES PREFIX "")
 
 set_source_files_properties(Core/Version.rc PROPERTIES OBJECT_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Core/Version.h")
 add_executable(launch_r6 WIN32 Launcher/LaunchR6.cpp Core/Version.rc)
 set_target_properties(launch_r6 PROPERTIES OUTPUT_NAME "LaunchR6")
 target_include_directories(launch_r6 PRIVATE Core "${TBL_DEPS_INC}")
-target_link_libraries(launch_r6 PRIVATE user32 shell32)
