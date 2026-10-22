@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Install build deps
-        run: sudo apt-get update && sudo apt-get install -y g++-mingw-w64-x86-64 ninja-build zip
+        run: sudo apt-get update && sudo apt-get install -y g++-mingw-w64-x86-64-win32 ninja-build zip
       - name: Build release zip
         run: bash build.sh
       - name: Create draft release with zip
