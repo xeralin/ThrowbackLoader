@@ -3,7 +3,7 @@
 
 #define TB_LOADER_MAJOR 0
 #define TB_LOADER_MINOR 1
-#define TB_LOADER_PATCH 6
+#define TB_LOADER_PATCH 7
 
 #define TB_LOADER_STR_DETAIL(x) #x
 #define TB_LOADER_STR(x) TB_LOADER_STR_DETAIL(x)
