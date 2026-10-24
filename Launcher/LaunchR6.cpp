@@ -13,11 +13,13 @@
 
 namespace
 {
+constexpr const wchar_t* DX11_EXECUTABLE = L"RainbowSix_DX11.exe";
+constexpr const wchar_t* VULKAN_EXECUTABLE = L"RainbowSix_Vulkan.exe";
 constexpr std::array<const wchar_t*, 4> EXECUTABLES = {
     L"RainbowSixGame.exe",
     L"RainbowSix.exe",
-    L"RainbowSix_DX11.exe",
-    L"RainbowSix_Vulkan.exe",
+    DX11_EXECUTABLE,
+    VULKAN_EXECUTABLE,
 };
 
 constexpr DWORD SAFETY_POLL_INTERVAL_MS = 3000;
@@ -243,12 +245,42 @@ void terminate_game_processes()
     }
 }
 
-const wchar_t* find_installed_executable()
+bool is_file(const wchar_t* path)
 {
+    const DWORD attributes = GetFileAttributesW(path);
+    return attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY) == 0;
+}
+
+bool has_argument(std::wstring_view args, std::wstring_view argument)
+{
+    size_t start = args.find_first_not_of(L" \t");
+    while (start != std::wstring_view::npos)
+    {
+        const size_t end = args.find_first_of(L" \t", start);
+        const std::wstring_view token = args.substr(start, end - start);
+        if (CompareStringOrdinal(token.data(), static_cast<int>(token.size()), argument.data(),
+                                 static_cast<int>(argument.size()), TRUE) == CSTR_EQUAL)
+        {
+            return true;
+        }
+        start = args.find_first_not_of(L" \t", end);
+    }
+    return false;
+}
+
+const wchar_t* find_installed_executable(const std::wstring& args)
+{
+    if (has_argument(args, L"/dx11") && is_file(DX11_EXECUTABLE))
+    {
+        return DX11_EXECUTABLE;
+    }
+    if (has_argument(args, L"/vulkan") && is_file(VULKAN_EXECUTABLE))
+    {
+        return VULKAN_EXECUTABLE;
+    }
     for (const auto executable : EXECUTABLES)
     {
-        const DWORD attributes = GetFileAttributesW(executable);
-        if (attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+        if (is_file(executable))
         {
             return executable;
         }
@@ -361,7 +393,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
     const LaunchConfig config = read_launch_config();
 
-    const wchar_t* executable = find_installed_executable();
+    const wchar_t* executable = find_installed_executable(config.args);
     if (executable == nullptr)
     {
         show_error(L"No R6S executable was found in this folder");
